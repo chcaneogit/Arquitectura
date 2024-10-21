@@ -1,0 +1,61 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Envío de Campañas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Envío de Campañas</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="message-container">
+    <h3>Enviar Nueva Campaña</h3>
+    <form>
+      <ion-item>
+        <ion-label position="floating">Nombre de la Campaña</ion-label>
+        <ion-input type="text" required></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Contenido del Mensaje</ion-label>
+        <ion-textarea required></ion-textarea>
+      </ion-item>
+
+      <ion-button expand="full" type="submit" style="margin-top: 20px;">
+        Enviar Campaña
+      </ion-button>
+    </form>
+  </div>
+</ion-content>
+
+<style>
+  /* Estilos personalizados */
+  .message-container {
+    background-color: #ffffff; /* Fondo del contenedor */
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra del contenedor */
+    padding: 20px; /* Espaciado interno */
+    margin: 20px 0; /* Espaciado externo */
+  }
+
+  ion-button {
+    background-color: #3880ff; /* Color de fondo del botón */
+    color: white; /* Color del texto del botón */
+  }
+
+  h3 {
+    text-align: center; /* Centrar el título */
+    margin-bottom: 20px; /* Espaciado debajo del título */
+  }
+
+  ion-item {
+    margin-bottom: 15px; /* Espaciado entre los elementos del formulario */
+  }
+
+  ion-header {
+    background-color: #f8f8f8; /* Color del encabezado */
+  }
+</style>

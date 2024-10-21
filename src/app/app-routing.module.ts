@@ -11,6 +11,10 @@ const routes: Routes = [
     redirectTo: 'home',
     pathMatch: 'full'
   },
+  {
+    path: 'envio',
+    loadChildren: () => import('./page/envio/envio.module').then( m => m.EnvioPageModule)
+  },
 ];
 
 @NgModule({
