@@ -23,21 +23,31 @@
         <ion-textarea required></ion-textarea>
       </ion-item>
 
-      <ion-item>
-        <ion-label position="floating">Destinatarios</ion-label>
-      </ion-item>
-
       <div class="destinatarios-container">
         <ion-card>
           <ion-card-header>
             <ion-card-title>Destinatarios</ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            <ul>
-              <li *ngFor="let destinatario of destinatarios">
-                {{ destinatario.nombre }} ({{ destinatario.correo }})
-              </li>
-            </ul>
+            <!-- Acordeón de destinatarios -->
+            <div class="accordion" id="destinatariosAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Lista de Destinatarios
+                  </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#destinatariosAccordion">
+                  <div class="accordion-body">
+                    <ul>
+                      <li *ngFor="let destinatario of destinatarios">
+                        {{ destinatario.nombre }} ({{ destinatario.correo }})
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
           </ion-card-content>
         </ion-card>
       </div>
@@ -52,60 +62,66 @@
 <style>
   /* Estilos personalizados para escritorio */
   .message-container {
-    max-width: 600px; /* Ancho máximo para escritorio */
-    margin: 20px auto; /* Centra el contenedor horizontalmente */
-    padding: 30px; /* Espaciado interno */
-    background-color: #ffffff; /* Fondo del contenedor */
-    border-radius: 8px; /* Bordes redondeados */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra del contenedor */
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
 
   .destinatarios-container {
-    margin: 20px 0; /* Espaciado alrededor del contenedor de destinatarios */
+    margin: 20px 0;
   }
 
   ion-card {
-    padding: 10px; /* Espaciado interno del card */
+    padding: 10px;
   }
 
   ion-card-title {
-    font-weight: bold; /* Negrita para el título del card */
+    font-weight: bold;
   }
 
   ion-button.send-button {
-    background-color: #3880ff; /* Color de fondo del botón */
-    color: white; /* Color del texto del botón */
-    font-size: 1rem; /* Tamaño de fuente del botón */
-    padding: 10px; /* Espaciado interno del botón */
-    margin-top: 20px; /* Espaciado encima del botón */
+    background-color: #3880ff;
+    color: white;
+    font-size: 1rem;
+    padding: 10px;
+    margin-top: 20px;
   }
 
   h3 {
-    text-align: center; /* Centrar el título */
-    margin-bottom: 20px; /* Espaciado debajo del título */
-    font-size: 1.5rem; /* Tamaño de fuente del título */
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
   }
 
   ion-item {
-    margin-bottom: 15px; /* Espaciado entre los elementos del formulario */
+    margin-bottom: 15px;
   }
 
   ion-header {
-    background-color: #f8f8f8; /* Color del encabezado */
+    background-color: #f8f8f8;
   }
 
   /* Estilos responsivos para pantallas más grandes */
   @media (min-width: 768px) {
     .message-container {
-      padding: 40px; /* Espaciado interno mayor en pantallas grandes */
+      padding: 40px;
     }
 
     ion-button.send-button {
-      font-size: 1.2rem; /* Tamaño de fuente del botón más grande */
+      font-size: 1.2rem;
     }
 
     h3 {
-      font-size: 2rem; /* Tamaño de fuente del título más grande */
+      font-size: 2rem;
     }
+  }
+
+  /* Acordeón personalizado */
+  .accordion-button {
+    background-color: #e9ecef;
+    font-weight: bold;
   }
 </style>
