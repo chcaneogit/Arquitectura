@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Envío de campañas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding custom-background">
+
+  <ion-card style="max-width: 400px; margin: auto;">
+    <ion-card-header>
+      <h3 style="font-size: 1.5rem; text-align: center;">Iniciar Sesión</h3>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="floating">Correo</ion-label>
+        <ion-input type="text" required></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Password</ion-label>
+        <ion-input type="password"></ion-input>
+      </ion-item>
+
+      <ion-button expand="full" type="submit" style="margin-top: 20px;">Login</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
+
+<style>
+  /* Asegúrate de que este CSS esté en el archivo de estilo correspondiente */
+  ion-card {
+    max-width: 500px; /* Ajusta el ancho máximo como prefieras */
+    margin: 20px auto; /* Centra el card horizontalmente */
+  }
+
+  ion-input {
+    font-size: 1rem; /* Aumenta el tamaño de la fuente */
+  }
+
+  ion-label {
+    font-size: 1rem; /* Aumenta el tamaño de la fuente del label */
+  }
+
+  ion-button {
+    font-size: 1.2rem; /* Aumenta el tamaño del botón */
+  }
+
+  h3 {
+    font-size: 1.8rem; /* Aumenta el tamaño del título */
+  }
+</style>

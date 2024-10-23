@@ -4,13 +4,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Envío de Campañas</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
+<ion-content class="ion-padding">
   <div class="message-container">
     <h3>Enviar Nueva Campaña</h3>
     <form>
@@ -24,7 +18,26 @@
         <ion-textarea required></ion-textarea>
       </ion-item>
 
-      <ion-button expand="full" type="submit" style="margin-top: 20px;">
+      <ion-item>
+        <ion-label position="floating">Destinatarios</ion-label>
+      </ion-item>
+      
+      <div class="destinatarios-container">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Destinatarios</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ul>
+              <li *ngFor="let destinatario of destinatarios">
+                {{ destinatario.nombre }} ({{ destinatario.correo }})
+              </li>
+            </ul>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <ion-button expand="full" type="submit" class="send-button">
         Enviar Campaña
       </ion-button>
     </form>
@@ -32,23 +45,40 @@
 </ion-content>
 
 <style>
-  /* Estilos personalizados */
+  /* Estilos personalizados para escritorio */
   .message-container {
+    max-width: 600px; /* Ancho máximo para escritorio */
+    margin: 20px auto; /* Centra el contenedor horizontalmente */
+    padding: 30px; /* Espaciado interno */
     background-color: #ffffff; /* Fondo del contenedor */
     border-radius: 8px; /* Bordes redondeados */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra del contenedor */
-    padding: 20px; /* Espaciado interno */
-    margin: 20px 0; /* Espaciado externo */
   }
 
-  ion-button {
+  .destinatarios-container {
+    margin: 20px 0; /* Espaciado alrededor del contenedor de destinatarios */
+  }
+
+  ion-card {
+    padding: 10px; /* Espaciado interno del card */
+  }
+
+  ion-card-title {
+    font-weight: bold; /* Negrita para el título del card */
+  }
+
+  ion-button.send-button {
     background-color: #3880ff; /* Color de fondo del botón */
     color: white; /* Color del texto del botón */
+    font-size: 1rem; /* Tamaño de fuente del botón */
+    padding: 10px; /* Espaciado interno del botón */
+    margin-top: 20px; /* Espaciado encima del botón */
   }
 
   h3 {
     text-align: center; /* Centrar el título */
     margin-bottom: 20px; /* Espaciado debajo del título */
+    font-size: 1.5rem; /* Tamaño de fuente del título */
   }
 
   ion-item {
@@ -57,5 +87,20 @@
 
   ion-header {
     background-color: #f8f8f8; /* Color del encabezado */
+  }
+
+  /* Estilos responsivos para pantallas más grandes */
+  @media (min-width: 768px) {
+    .message-container {
+      padding: 40px; /* Espaciado interno mayor en pantallas grandes */
+    }
+
+    ion-button.send-button {
+      font-size: 1.2rem; /* Tamaño de fuente del botón más grande */
+    }
+
+    h3 {
+      font-size: 2rem; /* Tamaño de fuente del título más grande */
+    }
   }
 </style>
