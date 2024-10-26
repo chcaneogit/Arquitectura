@@ -15,12 +15,12 @@
     <form>
       <ion-item>
         <ion-label position="floating">Nombre de la Campaña</ion-label>
-        <ion-input type="text" required></ion-input>
+        <ion-input type="text" required [(ngModel)]="campaignName" name="campaignName"></ion-input>
       </ion-item>
 
       <ion-item>
         <ion-label position="floating">Contenido del Mensaje</ion-label>
-        <ion-textarea required></ion-textarea>
+        <ion-textarea required [(ngModel)]="messageContent" name="messageContent"></ion-textarea>
       </ion-item>
 
       <div class="destinatarios-container">
@@ -52,7 +52,7 @@
         </ion-card>
       </div>
 
-      <ion-button expand="full" type="submit" class="send-button">
+      <ion-button expand="full" (click)="enviarCampania()" class="send-button">
         Enviar Campaña
       </ion-button>
     </form>
