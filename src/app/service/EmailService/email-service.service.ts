@@ -1,36 +1,21 @@
 import { Injectable } from '@angular/core';
-import emailjs from 'emailjs-com'; // Asegúrate de importar EmailJS
-import { environment } from 'src/environments/environment';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EmailService {
-  private userId = environment.emailjsUserId;
-  private serviceId = environment.emailjsServiceId;
-  private templateId = environment.emailjsTemplateId;
+  private apiUrl = 'http://localhost:3000/send-email'; // Ruta del servidor
 
-  constructor() {
-    emailjs.init(this.userId); // Inicializa EmailJS
-  }
+  constructor(private http: HttpClient) {}
 
-  sendEmail(toEmail: string, subject: string, message: string): Promise<any> {
-    const emailParams = {
-      to_email: toEmail,
+  sendEmail(toEmail: string, subject: string, message: string) {
+    const emailData = {
+      to: toEmail,
       subject: subject,
-      message: message
+      text: message,
     };
 
-    return new Promise((resolve, reject) => {
-      emailjs.send(this.serviceId, this.templateId, emailParams)
-        .then((response: any) => {
-          console.log('Correo enviado con éxito:', response);
-          resolve(response);
-        })
-        .catch((error: any) => {
-          console.error('Error al enviar el correo:', error);
-          reject(error);
-        });
-    });
+    return this.http.post(this.apiUrl, emailData);
   }
 }
