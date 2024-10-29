@@ -37,7 +37,7 @@ export class SupabaseService {
 
   // Método POST genérico
   post<T>(path: string, data: T): Observable<HttpResponse<T>> {
-    return this.http.post<T>(`${this.baseUrl}${path}`, data, { headers: this.getHeaders(), observe: 'response' })
+    return this.http.post<T>(`${this.baseUrl}/${path}`, data, { headers: this.getHeaders(), observe: 'response' })
       .pipe(
         catchError(this.handleError)
       );
@@ -52,7 +52,20 @@ export class SupabaseService {
       }),
       catchError(this.handleError)
     );
-}
+  }
 
+  // Método para crear una nueva campaña
+  createCampanha(campaignName: string, messageContent: string): Observable<HttpResponse<any>> {
+    const payload = {
+      nombre: campaignName,
+      contenido: messageContent,
+    };
 
+    return this.post<any>('campanhas', payload).pipe(
+      tap((response) => {
+        console.log('Campaña creada:', response.body);
+      }),
+      catchError(this.handleError)
+    );
+  }
 }

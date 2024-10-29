@@ -17,6 +17,7 @@ app.use(cors({
 
 app.use(express.json());
 
+// Ruta para enviar correos
 app.post('/send-email', async (req, res) => {
   const { to, subject, text } = req.body;
 
@@ -37,6 +38,12 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
+// Ruta de ejemplo (opcional)
+app.get('/envio', (req, res) => {
+  res.send('Página de envío'); // Puedes personalizar esto
+});
+
+// Iniciar el servidor
 app.listen(PORT, () => {
   console.log(`Servidor en funcionamiento en http://localhost:${PORT}`);
 });

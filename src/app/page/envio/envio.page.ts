@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { EmailService } from 'src/app/service/EmailService/email-service.service';
+import { EmailService } from 'src/app/service/emailService/email-service.service';
 import { SupabaseService } from 'src/app/service/supabase/supabase.service';
 
 @Component({
@@ -31,9 +31,23 @@ export class EnvioPage implements OnInit {
   }
 
   async enviarCampania(): Promise<void> {
-    const subject = `Campaña: ${this.campaignName}`;
     this.errores = [];
+    const subject = `Campaña: ${this.campaignName}`;
 
+    // Crear la campaña en la tabla
+    this.supabaseService.createCampanha(this.campaignName, this.messageContent).subscribe({
+      next: (response) => {
+        console.log('Campaña creada:', response.body);
+        this.enviarCorreos(subject); // Llama a la función para enviar correos después de crear la campaña
+      },
+      error: (error) => {
+        console.error('Error al crear la campaña:', error);
+        this.errores.push('Error al crear la campaña. Intenta nuevamente.');
+      }
+    });
+  }
+
+  private enviarCorreos(subject: string): void {
     for (const destinatario of this.destinatarios) {
       if (!destinatario.correo) {
         console.error(`El correo de ${destinatario.nombre} está vacío.`);
@@ -61,7 +75,6 @@ export class EnvioPage implements OnInit {
       console.log('Errores al enviar correos:', this.errores);
     }
   }
-
 
   private formatError(destinatarioNombre: string, error: any): string {
     let errorMessage: string;
