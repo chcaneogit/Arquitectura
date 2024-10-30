@@ -45,7 +45,7 @@ export class SupabaseService {
 
   // Método para obtener la lista de destinatarios
   getDestinatarios(): Observable<HttpResponse<any>> {
-    const params = new HttpParams().set('select', '*'); // Solo selecciona los campos de la tabla destinatario
+    const params = new HttpParams().set('select', '*');
     return this.get<any>('destinatario', params).pipe(
       tap((response) => {
         console.log('Destinatarios obtenidos:', response.body);
@@ -54,11 +54,13 @@ export class SupabaseService {
     );
   }
 
-  // Método para crear una nueva campaña
-  createCampanha(campaignName: string, messageContent: string): Observable<HttpResponse<any>> {
+  // Método para crear una nueva campaña con parámetros adicionales de totales
+  createCampanha(campaignName: string, messageContent: string, totalEnviados: number, totalNoEnviados: number): Observable<HttpResponse<any>> {
     const payload = {
       nombre: campaignName,
       contenido: messageContent,
+      totalEnviados: totalEnviados,
+      totalNoEnviados: totalNoEnviados,
     };
 
     return this.post<any>('campanhas', payload).pipe(

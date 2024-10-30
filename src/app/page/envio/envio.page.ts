@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { EmailService } from 'src/app/service/emailService/email-service.service';
+import { EmailService } from 'src/app/service/EmailService/email-service.service';
 import { SupabaseService } from 'src/app/service/supabase/supabase.service';
 
 @Component({
@@ -34,8 +34,8 @@ export class EnvioPage implements OnInit {
     this.errores = [];
     const subject = `Campaña: ${this.campaignName}`;
 
-    // Crear la campaña en la tabla
-    this.supabaseService.createCampanha(this.campaignName, this.messageContent).subscribe({
+    // Crear campaña y asignar valores iniciales para los totales
+    this.supabaseService.createCampanha(this.campaignName, this.messageContent, 0, 0).subscribe({
       next: (response) => {
         console.log('Campaña creada:', response.body);
         this.enviarCorreos(subject); // Llama a la función para enviar correos después de crear la campaña
@@ -48,32 +48,38 @@ export class EnvioPage implements OnInit {
   }
 
   private enviarCorreos(subject: string): void {
+    let totalEnviados = 0;
+    let totalNoEnviados = 0;
+
     for (const destinatario of this.destinatarios) {
+      if (destinatario.no_molestar) {
+        console.log(`No se enviará correo a ${destinatario.nombre} porque no molestar es TRUE.`);
+        totalNoEnviados++;
+        continue;
+      }
+
       if (!destinatario.correo) {
         console.error(`El correo de ${destinatario.nombre} está vacío.`);
         this.errores.push(`El correo de ${destinatario.nombre} está vacío.`);
         continue;
       }
 
-      // Construir el mensaje con un saludo personalizado
       const personalizedMessage = `Hola ${destinatario.nombre},\n\n${this.messageContent}`;
 
-      // Suscribirse al servicio de envío de correo
       this.emailService.sendEmail(destinatario.correo, subject, personalizedMessage).subscribe({
         next: (response) => {
           console.log(`Correo enviado a ${destinatario.nombre}:`, response);
+          totalEnviados++;
         },
         error: (error) => {
           console.error(`Error al enviar correo a ${destinatario.nombre}:`, error);
-          const formattedError = this.formatError(destinatario.nombre, error);
-          this.errores.push(formattedError);
+          this.errores.push(`Error al enviar correo a ${destinatario.nombre}: ${error}`);
         }
       });
     }
 
-    if (this.errores.length > 0) {
-      console.log('Errores al enviar correos:', this.errores);
-    }
+    console.log(`Total de correos enviados: ${totalEnviados}`);
+    console.log(`Total de correos no enviados: ${totalNoEnviados}`);
   }
 
   private formatError(destinatarioNombre: string, error: any): string {
