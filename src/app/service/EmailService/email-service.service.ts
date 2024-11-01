@@ -7,25 +7,14 @@ import { throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class EmailService {
-  private sendgridApiUrl = 'https://api.sendgrid.com/v3/mail/send';
-  private apiKey = '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';
+  private apiUrl = 'http://localhost:3000/send-email';  // Cambia a tu servidor local
 
   constructor(private http: HttpClient) {}
 
   sendEmail(to: string, subject: string, content: string) {
-    const payload = {
-      personalizations: [{ to: [{ email: to }] }],
-      from: { email: 'tu_correo@tudominio.com' },
-      subject: subject,
-      content: [{ type: 'text/plain', value: content }]
-    };
+    const payload = { to, subject, text: content };
 
-    return this.http.post(this.sendgridApiUrl, payload, {
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    }).pipe(
+    return this.http.post(this.apiUrl, payload).pipe(
       catchError((error: HttpErrorResponse) => {
         const errorMessage = this.handleSendGridError(error);
         return throwError(errorMessage); // Enviar el mensaje de error formateado

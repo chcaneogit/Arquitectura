@@ -30,17 +30,13 @@ export class SupabaseService {
   // Método GET genérico
   get<T>(path: string, params?: HttpParams): Observable<HttpResponse<T>> {
     return this.http.get<T>(`${this.baseUrl}/${path}`, { headers: this.getHeaders(), observe: 'response', params })
-      .pipe(
-        catchError(this.handleError)
-      );
+      .pipe(catchError(this.handleError));
   }
 
   // Método POST genérico
   post<T>(path: string, data: T): Observable<HttpResponse<T>> {
     return this.http.post<T>(`${this.baseUrl}/${path}`, data, { headers: this.getHeaders(), observe: 'response' })
-      .pipe(
-        catchError(this.handleError)
-      );
+      .pipe(catchError(this.handleError));
   }
 
   // Método para obtener la lista de destinatarios
@@ -54,20 +50,98 @@ export class SupabaseService {
     );
   }
 
-  // Método para crear una nueva campaña con parámetros adicionales de totales
-  createCampanha(campaignName: string, messageContent: string, totalEnviados: number, totalNoEnviados: number): Observable<HttpResponse<any>> {
+  // Método genérico para crear una entrada (campaña o reporte)
+  createEntry<T>(path: string, payload: T): Observable<HttpResponse<any>> {
+    return this.post<any>(path, payload).pipe(
+      tap((response) => {
+        console.log(`${path.charAt(0).toUpperCase() + path.slice(1)} creado:`, response.body);
+      }),
+      catchError((error) => {
+        console.error(`Error al crear ${path}:`, error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  // Método para crear una nueva campaña
+  createCampanha(campaignName: string, messageContent: string, enviados: number, noEnviados: number): Observable<HttpResponse<any>> {
     const payload = {
       nombre: campaignName,
       contenido: messageContent,
-      totalEnviados: totalEnviados,
-      totalNoEnviados: totalNoEnviados,
+      enviado: enviados,
+      no_enviado: noEnviados,
+      fecha_envio: this.getCurrentDate(),
     };
 
-    return this.post<any>('campanhas', payload).pipe(
+    return this.createEntry('campanhas', payload).pipe(
       tap((response) => {
         console.log('Campaña creada:', response.body);
+        // Crear un reporte después de crear la campaña
+        if (response.body) {
+          const { nombre } = response.body;
+          console.log('Creando reporte con:', nombre, enviados, noEnviados);
+          this.createReporte(nombre, enviados, noEnviados).subscribe(
+            (reporteResponse) => {
+              console.log('Reporte creado:', reporteResponse.body);
+            },
+            (error) => {
+              console.error('Error al crear el reporte:', error);
+            }
+          );
+        }
       }),
       catchError(this.handleError)
     );
+  }
+
+  // Método para crear un reporte
+  createReporte(nombreCampana: string, enviados: number, noEnviados: number): Observable<HttpResponse<any>> {
+    const payload = {
+      nombre_campanha: nombreCampana,
+      fecha_campanha: this.getCurrentDate(),
+      enviado: enviados,
+      no_enviado: noEnviados,
+    };
+
+    console.log('Payload para crear reporte:', payload);
+
+    return this.createEntry('reportes', payload);
+  }
+
+  // Método para actualizar una campaña con los totales de envíos
+  updateCampanha(campaignName: string, enviados: number, noEnviados: number): Observable<HttpResponse<any>> {
+    const payload = {
+      enviado: enviados,
+      no_enviado: noEnviados,
+      fecha_envio: this.getCurrentDate(),
+    };
+
+    return this.http.patch<any>(`${this.baseUrl}/campanhas?nombre=eq.${campaignName}`, payload, { headers: this.getHeaders(), observe: 'response' }).pipe(
+      tap((response) => {
+        console.log('Campaña actualizada:', response.body);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // Método para actualizar un reporte
+  updateReporte(campaignName: string, enviados: number, noEnviados: number): Observable<HttpResponse<any>> {
+    const payload = {
+      enviado: enviados,
+      no_enviado: noEnviados,
+    };
+
+    return this.http.patch<any>(`${this.baseUrl}/reportes?nombre=eq.${campaignName}`, payload, { headers: this.getHeaders(), observe: 'response' }).pipe(
+      tap((response) => {
+        console.log('Reporte actualizado:', response.body);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // Método para obtener la fecha actual en formato ISO
+  private getCurrentDate(): string {
+    const date = new Date();
+    return date.toISOString().split('T')[0]; // Formato yyyy-mm-dd
   }
 }
