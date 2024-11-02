@@ -1,0 +1,52 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand">Ver Reportes</a>
+        <ion-button class="navbar-brand d-flex" color="dark" (click)="irHome()">Volver</ion-button>
+      </div>
+    </nav>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <ion-card *ngFor="let reporte of reportes" style="margin-bottom: 15px;">
+      <ion-card-header>
+        <ion-card-title>Reporte {{ reporte.id }}</ion-card-title>
+        <ion-card-subtitle>{{ reporte.fecha_campanha | date:'short' }}</ion-card-subtitle>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p><strong>Campaña:</strong> {{ reporte.nombre_campanha }}</p>
+        <p><strong>Enviados:</strong> {{ reporte.enviado }}</p>
+        <p><strong>No Enviados:</strong> {{ reporte.no_enviado }}</p>
+        <ion-button color="primary" (click)="mostrarDetalles(reporte)" >Ver Detalles</ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+
+  <!-- Modal para mostrar los detalles del reporte -->
+  <ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Detalles del Reporte</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="cancel()">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding" style="--background: white;">
+        <div *ngIf="selectedReporte">
+          <p><strong>ID:</strong> {{ selectedReporte.id }}</p>
+          <p><strong>Campaña:</strong> {{ selectedReporte.nombre_campanha }}</p>
+          <p><strong>Fecha:</strong> {{ selectedReporte.fecha_campanha | date:'short' }}</p>
+          <p><strong>Enviados:</strong> {{ selectedReporte.enviado }}</p>
+          <p><strong>No Enviados:</strong> {{ selectedReporte.no_enviado }}</p>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>

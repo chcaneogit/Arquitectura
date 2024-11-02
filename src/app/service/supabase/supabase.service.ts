@@ -144,4 +144,41 @@ export class SupabaseService {
     const date = new Date();
     return date.toISOString().split('T')[0]; // Formato yyyy-mm-dd
   }
+
+  // Método para obtener todas las campañas
+  getCampanhas(): Observable<HttpResponse<any>> {
+    const params = new HttpParams().set('select', '*'); // Selecciona todos los campos de la tabla 'campanhas'
+    return this.get<any>('campanhas', params).pipe(
+      tap((response) => {
+        console.log('Campañas obtenidas:', response.body);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // Método para eliminar una campaña por su ID
+  deleteCampanhaById(campaignId: number): Observable<HttpResponse<any>> {
+    return this.http.delete<any>(`${this.baseUrl}/campanhas?id=eq.${campaignId}`, {
+      headers: this.getHeaders(),
+      observe: 'response',
+    }).pipe(
+      tap((response) => {
+        console.log('Campaña eliminada:', response.body);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // Método para obtener todos los reportes
+  getReportes(): Observable<HttpResponse<any>> {
+    const params = new HttpParams().set('select', '*'); // Selecciona todos los campos de la tabla 'reportes'
+    return this.get<any>('reportes', params).pipe(
+      tap((response) => {
+        console.log('Reportes obtenidos:', response.body);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+
 }

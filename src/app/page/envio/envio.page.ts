@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { EmailService } from 'src/app/service/emailService/email-service.service';
 import { SupabaseService } from 'src/app/service/supabase/supabase.service';
+import { AlertController } from '@ionic/angular'; // Importa el AlertController
 
 @Component({
   selector: 'app-envio',
@@ -13,7 +15,12 @@ export class EnvioPage implements OnInit {
   messageContent: string = '';
   errores: string[] = [];
 
-  constructor(private supabaseService: SupabaseService, private emailService: EmailService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private emailService: EmailService,
+    private router: Router,
+    private alertController: AlertController // Inyecta el AlertController
+  ) {}
 
   ngOnInit() {
     this.cargarDestinatarios();
@@ -45,21 +52,23 @@ export class EnvioPage implements OnInit {
           this.supabaseService.updateCampanha(this.campaignName, enviados, noEnviados).subscribe({
             next: (updateResponse) => {
               console.log('Campaña actualizada con totales de envíos:', updateResponse.body);
+
+              // Crear el reporte
+              this.supabaseService.createReporte(this.campaignName, enviados, noEnviados).subscribe({
+                next: (reporteResponse) => {
+                  console.log('Reporte creado:', reporteResponse.body);
+                  this.mostrarAlert(); // Muestra el alert de éxito
+                  this.limpiarCampos(); // Limpia los campos
+                },
+                error: (error) => {
+                  console.error('Error al crear el reporte:', error);
+                  this.errores.push('Error al crear el reporte. Intenta nuevamente.');
+                }
+              });
             },
             error: (error) => {
               console.error('Error al actualizar la campaña:', error);
               this.errores.push('Error al actualizar la campaña con los totales de envíos.');
-            }
-          });
-
-          // Crear el reporte
-          this.supabaseService.createReporte(this.campaignName, enviados, noEnviados).subscribe({
-            next: (reporteResponse) => {
-              console.log('Reporte creado:', reporteResponse.body);
-            },
-            error: (error) => {
-              console.error('Error al crear el reporte:', error);
-              this.errores.push('Error al crear el reporte. Intenta nuevamente.');
             }
           });
         });
@@ -70,7 +79,6 @@ export class EnvioPage implements OnInit {
       }
     });
   }
-
 
   private async enviarCorreos(subject: string): Promise<{ enviados: number, noEnviados: number }> {
     let totalEnviados = 0;
@@ -86,6 +94,14 @@ export class EnvioPage implements OnInit {
       if (!destinatario.correo) {
         console.error(`El correo de ${destinatario.nombre} está vacío.`);
         this.errores.push(`El correo de ${destinatario.nombre} está vacío.`);
+        totalNoEnviados++;
+        return;
+      }
+
+      // Validar el formato del correo
+      if (!this.validarFormatoCorreo(destinatario.correo)) {
+        console.error(`El correo de ${destinatario.nombre} no tiene un formato válido.`);
+        this.errores.push(`El correo de ${destinatario.nombre} no tiene un formato válido.`);
         totalNoEnviados++;
         return;
       }
@@ -112,6 +128,11 @@ export class EnvioPage implements OnInit {
     return { enviados: totalEnviados, noEnviados: totalNoEnviados };
   }
 
+  // Función para validar el formato del correo
+  private validarFormatoCorreo(correo: string): boolean {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(correo);
+  }
 
   private formatError(destinatarioNombre: string, error: any): string {
     let errorMessage: string;
@@ -123,5 +144,29 @@ export class EnvioPage implements OnInit {
     }
 
     return errorMessage;
+  }
+
+  private async mostrarAlert() {
+    const alert = await this.alertController.create({
+      header: 'Éxito',
+      message: 'La campaña se ha enviado exitosamente.',
+      buttons: [{
+        text: 'OK',
+        handler: () => {
+          this.irHome(); // Navega al home cuando el usuario presiona 'OK'
+        }
+      }]
+    });
+
+    await alert.present();
+  }
+
+  private limpiarCampos() {
+    this.campaignName = '';
+    this.messageContent = '';
+  }
+
+  irHome() {
+    this.router.navigate(['/home']);
   }
 }

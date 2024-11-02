@@ -1,0 +1,41 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Envío de campañas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding custom-background">
+  <!-- Agregar los botones de acciones -->
+   <br>
+   <br>
+   <br>
+   <br>
+   <br>
+   <br>
+
+  <ion-card style="max-width: 400px; margin: auto; ">
+    <ion-card-content>
+      <ion-button expand="full" style="margin-bottom: 10px;"(click)="enviar()">Enviar Campaña</ion-button>
+      <br>
+      <ion-button expand="full" style="margin-bottom: 10px;"(click)="campanha()">Ver Campañas</ion-button>
+      <br>
+      <ion-button expand="full" style="margin-bottom: 10px;"(click)="reporte()">Ver Reportes</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
+
+<style>
+  /* Asegúrate de que este CSS esté en el archivo de estilo correspondiente */
+  ion-card {
+    max-width: 500px; /* Ajusta el ancho máximo como prefieras */
+    margin: 20px auto; /* Centra el card horizontalmente */
+  }
+
+  ion-button {
+    font-size: 1.2rem; /* Aumenta el tamaño del botón */
+  }
+</style>

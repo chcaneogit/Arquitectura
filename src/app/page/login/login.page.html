@@ -16,16 +16,16 @@
 
     <ion-card-content>
       <ion-item>
-        <ion-label position="floating">Correo</ion-label>
-        <ion-input type="text" required></ion-input>
+        <ion-label position="floating">Usuario</ion-label>
+        <ion-input type="text" [(ngModel)]="email" required></ion-input> <!-- Enlaza el input -->
       </ion-item>
 
       <ion-item>
         <ion-label position="floating">Password</ion-label>
-        <ion-input type="password"></ion-input>
+        <ion-input type="password" [(ngModel)]="password"></ion-input> <!-- Enlaza el input -->
       </ion-item>
 
-      <ion-button expand="full" type="submit" style="margin-top: 20px;">Login</ion-button>
+      <ion-button expand="full" (click)="login()" style="margin-top: 20px;">Login</ion-button> <!-- Llama al método login -->
     </ion-card-content>
   </ion-card>
 
