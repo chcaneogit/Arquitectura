@@ -50,6 +50,20 @@ export class SupabaseService {
     );
   }
 
+  // Método para actualizar el campo no_molestar de un destinatario
+  updateDestinatarioNoMolestar(rut: string, noMolestar: boolean): Observable<HttpResponse<any>> {
+    const payload = { no_molestar: noMolestar };
+    return this.http.patch<any>(`${this.baseUrl}/destinatario?rut=eq.${rut}`, payload, {
+      headers: this.getHeaders(),
+      observe: 'response'
+    }).pipe(
+      tap((response) => {
+        console.log(`Destinatario ${rut} actualizado a no_molestar:`, noMolestar);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
   // Método genérico para crear una entrada (campaña o reporte)
   createEntry<T>(path: string, payload: T): Observable<HttpResponse<any>> {
     return this.post<any>(path, payload).pipe(
@@ -179,6 +193,5 @@ export class SupabaseService {
       catchError(this.handleError)
     );
   }
-
 
 }

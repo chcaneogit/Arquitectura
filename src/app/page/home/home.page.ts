@@ -14,7 +14,7 @@ export class HomePage implements OnInit {
   }
 
   enviar() {
-    this.router.navigate(['/envio']);
+    this.router.navigate(['/envio'], { queryParams: { refresh: new Date().getTime() } });
   }
 
   campanha() {
@@ -23,6 +23,10 @@ export class HomePage implements OnInit {
 
   reporte() {
     this.router.navigate(['/ver-reporte']);
+  }
+
+  cerrar() {
+    this.router.navigate(['/login']);
   }
 
 }

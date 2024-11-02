@@ -13,13 +13,22 @@ export class LoginPage implements OnInit {
   constructor(private router: Router) { }
 
   ngOnInit() {
+    this.limpiarCampos();
   }
 
   login() {
-    if (this.email === 'usuario' && this.password === 'usuario') {
+    if (this.email === 'admin' && this.password === 'admin') {
+      this.router.navigate(['/admin']);
+    } else if (this.email === 'user' && this.password === 'user') {
       this.router.navigate(['/home']);
     } else {
       alert('Credenciales incorrectas.');
     }
+  }
+
+
+  limpiarCampos() {
+    this.email = '';
+    this.password = '';
   }
 }
