@@ -40,7 +40,7 @@
                   <div class="accordion-body">
                     <ul>
                       <li *ngFor="let destinatario of destinatarios">
-                        {{ destinatario.nombre }} ({{ destinatario.correo }})
+                        {{ destinatario.nombre }} ({{ destinatario.correo }}) <br>{{ destinatario.telefono }}
                       </li>
                     </ul>
                   </div>
@@ -55,7 +55,6 @@
         Enviar Campaña
       </ion-button>
     </form>
-
   </div>
 </ion-content>
 

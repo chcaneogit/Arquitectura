@@ -7,25 +7,44 @@ import { throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class EmailService {
-  private apiUrl = 'http://localhost:3000/send-email';  // Cambia a tu servidor local
+  private apiUrlEmail = 'http://localhost:3000/send-email';  // Ruta para correos
+  private apiUrlSms = 'http://localhost:3000/send-sms'; // Ruta para SMS
 
   constructor(private http: HttpClient) {}
 
+  // Método para enviar correos electrónicos
   sendEmail(to: string, subject: string, content: string) {
     const payload = { to, subject, text: content };
-
-    return this.http.post(this.apiUrl, payload).pipe(
+    return this.http.post(this.apiUrlEmail, payload).pipe(
       catchError((error: HttpErrorResponse) => {
         const errorMessage = this.handleSendGridError(error);
-        return throwError(errorMessage); // Enviar el mensaje de error formateado
+        return throwError(errorMessage);
+      })
+    );
+  }
+
+  // Método para enviar SMS
+  sendSms(to: string, message: string) {
+    const payload = { to, message };
+    return this.http.post(this.apiUrlSms, payload).pipe(
+      catchError((error: HttpErrorResponse) => {
+        const errorMessage = this.handleTwilioError(error);
+        return throwError(errorMessage);
       })
     );
   }
 
   private handleSendGridError(error: HttpErrorResponse): string {
     if (error.error && error.error.errors) {
-      // SendGrid suele enviar los errores en un arreglo de 'errors'
       return error.error.errors.map((err: any) => `${err.message}`).join(', ');
+    } else {
+      return `Error desconocido: ${error.message}`;
+    }
+  }
+
+  private handleTwilioError(error: HttpErrorResponse): string {
+    if (error.error && error.error.message) {
+      return `Error de Twilio: ${error.error.message}`;
     } else {
       return `Error desconocido: ${error.message}`;
     }

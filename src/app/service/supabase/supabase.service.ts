@@ -78,12 +78,14 @@ export class SupabaseService {
   }
 
   // Método para crear una nueva campaña
-  createCampanha(campaignName: string, messageContent: string, enviados: number, noEnviados: number): Observable<HttpResponse<any>> {
+  createCampanha(campaignName: string, messageContent: string, enviados: number, noEnviados: number, enviadosSms: number, noEnviadosSms: number): Observable<HttpResponse<any>> {
     const payload = {
       nombre: campaignName,
       contenido: messageContent,
       enviado: enviados,
       no_enviado: noEnviados,
+      enviado_sms: enviadosSms,
+      no_enviado_sms: noEnviadosSms,
       fecha_envio: this.getCurrentDate(),
     };
 
@@ -93,8 +95,8 @@ export class SupabaseService {
         // Crear un reporte después de crear la campaña
         if (response.body) {
           const { nombre } = response.body;
-          console.log('Creando reporte con:', nombre, enviados, noEnviados);
-          this.createReporte(nombre, enviados, noEnviados).subscribe(
+          console.log('Creando reporte con:', nombre, enviados, noEnviados, enviadosSms, noEnviadosSms);
+          this.createReporte(nombre, enviados, noEnviados, enviadosSms, noEnviadosSms).subscribe(
             (reporteResponse) => {
               console.log('Reporte creado:', reporteResponse.body);
             },
@@ -109,12 +111,14 @@ export class SupabaseService {
   }
 
   // Método para crear un reporte
-  createReporte(nombreCampana: string, enviados: number, noEnviados: number): Observable<HttpResponse<any>> {
+  createReporte(nombreCampana: string, enviados: number, noEnviados: number, enviadosSms: number, noEnviadosSms: number): Observable<HttpResponse<any>> {
     const payload = {
       nombre_campanha: nombreCampana,
       fecha_campanha: this.getCurrentDate(),
       enviado: enviados,
       no_enviado: noEnviados,
+      enviado_sms: enviadosSms,
+      no_enviado_sms: noEnviadosSms,
     };
 
     console.log('Payload para crear reporte:', payload);
@@ -123,10 +127,12 @@ export class SupabaseService {
   }
 
   // Método para actualizar una campaña con los totales de envíos
-  updateCampanha(campaignName: string, enviados: number, noEnviados: number): Observable<HttpResponse<any>> {
+  updateCampanha(campaignName: string, enviados: number, noEnviados: number, enviadosSms: number, noEnviadosSms: number): Observable<HttpResponse<any>> {
     const payload = {
       enviado: enviados,
       no_enviado: noEnviados,
+      enviado_sms: enviadosSms,
+      no_enviado_sms: noEnviadosSms,
       fecha_envio: this.getCurrentDate(),
     };
 
@@ -139,10 +145,12 @@ export class SupabaseService {
   }
 
   // Método para actualizar un reporte
-  updateReporte(campaignName: string, enviados: number, noEnviados: number): Observable<HttpResponse<any>> {
+  updateReporte(campaignName: string, enviados: number, noEnviados: number, enviadosSms: number, noEnviadosSms: number): Observable<HttpResponse<any>> {
     const payload = {
       enviado: enviados,
       no_enviado: noEnviados,
+      enviado_sms: enviadosSms,
+      no_enviado_sms: noEnviadosSms,
     };
 
     return this.http.patch<any>(`${this.baseUrl}/reportes?nombre=eq.${campaignName}`, payload, { headers: this.getHeaders(), observe: 'response' }).pipe(

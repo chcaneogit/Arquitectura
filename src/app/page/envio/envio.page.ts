@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { EmailService } from 'src/app/service/emailService/email-service.service';
 import { SupabaseService } from 'src/app/service/supabase/supabase.service';
-import { AlertController } from '@ionic/angular'; // Importa el AlertController
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-envio',
@@ -19,7 +19,7 @@ export class EnvioPage implements OnInit {
     private supabaseService: SupabaseService,
     private emailService: EmailService,
     private router: Router,
-    private alertController: AlertController // Inyecta el AlertController
+    private alertController: AlertController
   ) {}
 
   ngOnInit() {
@@ -29,7 +29,6 @@ export class EnvioPage implements OnInit {
   cargarDestinatarios(): void {
     this.supabaseService.getDestinatarios().subscribe({
       next: (response) => {
-        console.log('Respuesta de Supabase:', response);
         this.destinatarios = response.body || [];
         console.log('Destinatarios cargados:', this.destinatarios);
       },
@@ -41,121 +40,106 @@ export class EnvioPage implements OnInit {
     this.errores = [];
     const subject = `Campaña: ${this.campaignName}`;
 
-    // Crea la campaña
-    this.supabaseService.createCampanha(this.campaignName, this.messageContent, 0, 0).subscribe({
-      next: (response) => {
-        console.log('Campaña creada:', response.body);
+    // Inicializar contadores para SMS y correos
+    let totalEnviados = 0;
+    let totalNoEnviados = 0;
+    let totalEnviadosSMS = 0;
+    let totalNoEnviadosSMS = 0;
 
-        // Enviar correos después de que la campaña ha sido creada
-        this.enviarCorreos(subject).then(({ enviados, noEnviados }) => {
-          // Actualizar la campaña con los totales de enviados y no enviados
-          this.supabaseService.updateCampanha(this.campaignName, enviados, noEnviados).subscribe({
-            next: (updateResponse) => {
-              console.log('Campaña actualizada con totales de envíos:', updateResponse.body);
+    // Crear campaña inicial
+    this.supabaseService.createCampanha(this.campaignName, this.messageContent, totalEnviados, totalNoEnviados, totalEnviadosSMS, totalNoEnviadosSMS).subscribe({
+      next: async () => {
+        // Enviar mensajes y obtener totales
+        const resultados = await this.enviarMensajes(subject);
+        totalEnviados = resultados.enviados;
+        totalNoEnviados = resultados.noEnviados;
+        totalEnviadosSMS = resultados.enviadosSMS;
+        totalNoEnviadosSMS = resultados.noEnviadosSMS;
 
-              // Crear el reporte
-              this.supabaseService.createReporte(this.campaignName, enviados, noEnviados).subscribe({
-                next: (reporteResponse) => {
-                  console.log('Reporte creado:', reporteResponse.body);
-                  this.mostrarAlert(); // Muestra el alert de éxito
-                  this.limpiarCampos(); // Limpia los campos
-                },
-                error: (error) => {
-                  console.error('Error al crear el reporte:', error);
-                  this.errores.push('Error al crear el reporte. Intenta nuevamente.');
-                }
-              });
-            },
-            error: (error) => {
-              console.error('Error al actualizar la campaña:', error);
-              this.errores.push('Error al actualizar la campaña con los totales de envíos.');
-            }
-          });
+        console.log('Resultados de envío:', resultados);
+
+        // Actualizar campaña con los totales
+        this.supabaseService.updateCampanha(this.campaignName, totalEnviados, totalNoEnviados, totalEnviadosSMS, totalNoEnviadosSMS).subscribe({
+          next: () => {
+            // Crear reporte con los totales
+            this.supabaseService.createReporte(this.campaignName, totalEnviados, totalNoEnviados, totalEnviadosSMS, totalNoEnviadosSMS).subscribe({
+              next: () => {
+                this.mostrarAlert();
+                this.limpiarCampos();
+              },
+              error: () => this.errores.push('Error al crear el reporte. Intenta nuevamente.')
+            });
+          },
+          error: () => this.errores.push('Error al actualizar la campaña con los totales de envíos.'),
         });
       },
-      error: (error) => {
-        console.error('Error al crear la campaña:', error);
-        this.errores.push('Error al crear la campaña. Intenta nuevamente.');
-      }
+      error: () => this.errores.push('Error al crear la campaña. Intenta nuevamente.')
     });
   }
 
-  private async enviarCorreos(subject: string): Promise<{ enviados: number, noEnviados: number }> {
+  private async enviarMensajes(subject: string): Promise<{ enviados: number, noEnviados: number, enviadosSMS: number, noEnviadosSMS: number }> {
     let totalEnviados = 0;
     let totalNoEnviados = 0;
+    let totalEnviadosSMS = 0;
+    let totalNoEnviadosSMS = 0;
 
     const promises = this.destinatarios.map(async (destinatario) => {
+      // Comprobar si el destinatario ha solicitado no recibir mensajes
       if (destinatario.no_molestar) {
-        console.log(`No se enviará correo a ${destinatario.nombre} porque no molestar es TRUE.`);
+        this.errores.push(`No se puede enviar correo ni SMS a ${destinatario.nombre}, ha solicitado no recibir mensajes.`);
         totalNoEnviados++;
-        return;
+        totalNoEnviadosSMS++;
+        return; // Salir de la función para este destinatario
       }
 
-      if (!destinatario.correo) {
-        console.error(`El correo de ${destinatario.nombre} está vacío.`);
-        this.errores.push(`El correo de ${destinatario.nombre} está vacío.`);
-        totalNoEnviados++;
-        return;
+      // Enviar correo si tiene un correo
+      if (destinatario.correo) {
+        const personalizedMessage = `Hola ${destinatario.nombre},\n\n${this.messageContent}`;
+        try {
+          await this.emailService.sendEmail(destinatario.correo, subject, personalizedMessage).toPromise();
+          totalEnviados++; // Incrementar solo si se envía correctamente
+          console.log(`Correo enviado a ${destinatario.nombre}`);
+        } catch {
+          this.errores.push(`Error al enviar correo a ${destinatario.nombre}.`);
+          totalNoEnviados++; // Incrementar si hay error
+        }
+      } else {
+        this.errores.push(`No se puede enviar correo a ${destinatario.nombre}, no tiene correo.`);
+        totalNoEnviados++; // Incrementar si no tiene correo
       }
 
-      // Validar el formato del correo
-      if (!this.validarFormatoCorreo(destinatario.correo)) {
-        console.error(`El correo de ${destinatario.nombre} no tiene un formato válido.`);
-        this.errores.push(`El correo de ${destinatario.nombre} no tiene un formato válido.`);
+      // Enviar SMS si tiene un número de teléfono
+      if (destinatario.telefono) {
+        const personalizedMessage = `Hola ${destinatario.nombre},\n\n${this.messageContent}`;
+        try {
+          await this.emailService.sendSms(destinatario.telefono, personalizedMessage).toPromise();
+          totalEnviadosSMS++; // Incrementar solo si se envía correctamente
+          console.log(`SMS enviado a ${destinatario.nombre}`);
+        } catch {
+          this.errores.push(`Error al enviar SMS a ${destinatario.nombre}.`);
+          totalNoEnviados++;
+          totalNoEnviadosSMS++; // Incrementar si hay error en SMS también
+        }
+      } else {
+        this.errores.push(`No se puede enviar SMS a ${destinatario.nombre}, no tiene teléfono.`);
         totalNoEnviados++;
-        return;
-      }
-
-      const personalizedMessage = `Hola ${destinatario.nombre},\n\n${this.messageContent}`;
-
-      try {
-        await this.emailService.sendEmail(destinatario.correo, subject, personalizedMessage).toPromise();
-        console.log(`Correo enviado a ${destinatario.nombre}`);
-        totalEnviados++;
-      } catch (error) {
-        const errorMessage = this.formatError(destinatario.nombre, error);
-        console.error(errorMessage);
-        this.errores.push(errorMessage);
-        totalNoEnviados++;
+        totalNoEnviadosSMS++; // Incrementar si no tiene teléfono
       }
     });
 
     await Promise.all(promises);
 
-    console.log(`Total de correos enviados: ${totalEnviados}`);
-    console.log(`Total de correos no enviados: ${totalNoEnviados}`);
+    console.log(`Totales enviados: ${totalEnviados}, No enviados: ${totalNoEnviados}`);
+    console.log(`Totales SMS enviados: ${totalEnviadosSMS}, No enviados SMS: ${totalNoEnviadosSMS}`);
 
-    return { enviados: totalEnviados, noEnviados: totalNoEnviados };
-  }
-
-  // Función para validar el formato del correo
-  private validarFormatoCorreo(correo: string): boolean {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(correo);
-  }
-
-  private formatError(destinatarioNombre: string, error: any): string {
-    let errorMessage: string;
-
-    if (typeof error === 'object' && error !== null && 'text' in error) {
-      errorMessage = `Error al enviar correo a ${destinatarioNombre}: ${error.text}`;
-    } else {
-      errorMessage = `Error desconocido al enviar correo a ${destinatarioNombre}.`;
-    }
-
-    return errorMessage;
+    return { enviados: totalEnviados, noEnviados: totalNoEnviados, enviadosSMS: totalEnviadosSMS, noEnviadosSMS: totalNoEnviadosSMS };
   }
 
   private async mostrarAlert() {
     const alert = await this.alertController.create({
       header: 'Éxito',
       message: 'La campaña se ha enviado exitosamente.',
-      buttons: [{
-        text: 'OK',
-        handler: () => {
-          this.irHome(); // Navega al home cuando el usuario presiona 'OK'
-        }
-      }]
+      buttons: [{ text: 'OK', handler: () => this.limpiarCampos() }]
     });
 
     await alert.present();
