@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { EmailService } from 'src/app/service/emailService/email-service.service';
 import { SupabaseService } from 'src/app/service/supabase/supabase.service';
 import { AlertController } from '@ionic/angular';
+import { EmailService } from 'src/app/service/EmailService/email-service.service';
 
 @Component({
   selector: 'app-envio',
