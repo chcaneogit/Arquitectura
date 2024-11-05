@@ -40,16 +40,23 @@ export class EnvioPage implements OnInit {
     this.errores = [];
     const subject = `Campaña: ${this.campaignName}`;
 
-    // Inicializar contadores para SMS y correos
+    // Validación horaria
+    const now = new Date();
+    const currentHour = now.getHours();
+
+    if (currentHour < 8 || currentHour >= 22) {
+      this.errores.push('No se puede enviar la campaña fuera del horario permitido (8:00 a 22:00 hrs).');
+      await this.mostrarAlertaError();
+      return;
+    }
+
     let totalEnviados = 0;
     let totalNoEnviados = 0;
     let totalEnviadosSMS = 0;
     let totalNoEnviadosSMS = 0;
 
-    // Crear campaña inicial
     this.supabaseService.createCampanha(this.campaignName, this.messageContent, totalEnviados, totalNoEnviados, totalEnviadosSMS, totalNoEnviadosSMS).subscribe({
       next: async () => {
-        // Enviar mensajes y obtener totales
         const resultados = await this.enviarMensajes(subject);
         totalEnviados = resultados.enviados;
         totalNoEnviados = resultados.noEnviados;
@@ -58,10 +65,8 @@ export class EnvioPage implements OnInit {
 
         console.log('Resultados de envío:', resultados);
 
-        // Actualizar campaña con los totales
         this.supabaseService.updateCampanha(this.campaignName, totalEnviados, totalNoEnviados, totalEnviadosSMS, totalNoEnviadosSMS).subscribe({
           next: () => {
-            // Crear reporte con los totales
             this.supabaseService.createReporte(this.campaignName, totalEnviados, totalNoEnviados, totalEnviadosSMS, totalNoEnviadosSMS).subscribe({
               next: () => {
                 this.mostrarAlert();
@@ -84,46 +89,43 @@ export class EnvioPage implements OnInit {
     let totalNoEnviadosSMS = 0;
 
     const promises = this.destinatarios.map(async (destinatario) => {
-      // Comprobar si el destinatario ha solicitado no recibir mensajes
       if (destinatario.no_molestar) {
         this.errores.push(`No se puede enviar correo ni SMS a ${destinatario.nombre}, ha solicitado no recibir mensajes.`);
         totalNoEnviados++;
         totalNoEnviadosSMS++;
-        return; // Salir de la función para este destinatario
+        return;
       }
 
-      // Enviar correo si tiene un correo
       if (destinatario.correo) {
         const personalizedMessage = `Hola ${destinatario.nombre},\n\n${this.messageContent}`;
         try {
           await this.emailService.sendEmail(destinatario.correo, subject, personalizedMessage).toPromise();
-          totalEnviados++; // Incrementar solo si se envía correctamente
+          totalEnviados++;
           console.log(`Correo enviado a ${destinatario.nombre}`);
         } catch {
           this.errores.push(`Error al enviar correo a ${destinatario.nombre}.`);
-          totalNoEnviados++; // Incrementar si hay error
+          totalNoEnviados++;
         }
       } else {
         this.errores.push(`No se puede enviar correo a ${destinatario.nombre}, no tiene correo.`);
-        totalNoEnviados++; // Incrementar si no tiene correo
+        totalNoEnviados++;
       }
 
-      // Enviar SMS si tiene un número de teléfono
       if (destinatario.telefono) {
         const personalizedMessage = `Hola ${destinatario.nombre},\n\n${this.messageContent}`;
         try {
           await this.emailService.sendSms(destinatario.telefono, personalizedMessage).toPromise();
-          totalEnviadosSMS++; // Incrementar solo si se envía correctamente
+          totalEnviadosSMS++;
           console.log(`SMS enviado a ${destinatario.nombre}`);
         } catch {
           this.errores.push(`Error al enviar SMS a ${destinatario.nombre}.`);
           totalNoEnviados++;
-          totalNoEnviadosSMS++; // Incrementar si hay error en SMS también
+          totalNoEnviadosSMS++;
         }
       } else {
         this.errores.push(`No se puede enviar SMS a ${destinatario.nombre}, no tiene teléfono.`);
         totalNoEnviados++;
-        totalNoEnviadosSMS++; // Incrementar si no tiene teléfono
+        totalNoEnviadosSMS++;
       }
     });
 
@@ -140,6 +142,16 @@ export class EnvioPage implements OnInit {
       header: 'Éxito',
       message: 'La campaña se ha enviado exitosamente.',
       buttons: [{ text: 'OK', handler: () => this.limpiarCampos() }]
+    });
+
+    await alert.present();
+  }
+
+  private async mostrarAlertaError() {
+    const alert = await this.alertController.create({
+      header: 'Error',
+      message: 'No se puede enviar la campaña fuera del horario permitido (8:00 a 22:00 hrs).',
+      buttons: ['OK']
     });
 
     await alert.present();
