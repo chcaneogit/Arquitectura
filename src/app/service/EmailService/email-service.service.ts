@@ -12,8 +12,8 @@ export class EmailService {
 
   constructor(private http: HttpClient) {
     // Determina la IP a usar
-    this.apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '192.168.0.3'
-                  ? 'http://192.168.0.3:8080'
+    this.apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '192.168.0.3' //Cambia esto por tu IP local
+                  ? 'http://192.168.0.3:8080' //Cambia esto por tu IP local
                   : 'http://181.73.104.66:8080'; // Cambia esto por tu IP pública
   }
 

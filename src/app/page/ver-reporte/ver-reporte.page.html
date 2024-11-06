@@ -14,13 +14,15 @@
     <ion-card *ngFor="let reporte of reportes" style="margin-bottom: 15px;">
       <ion-card-header>
         <ion-card-title>Reporte {{ reporte.id }}</ion-card-title>
-        <ion-card-subtitle>{{ reporte.fecha_campanha | date:'short' }}</ion-card-subtitle>
+        <ion-card-subtitle>{{reporte.fecha_campanha}}</ion-card-subtitle>
       </ion-card-header>
 
       <ion-card-content>
         <p><strong>Campaña:</strong> {{ reporte.nombre_campanha }}</p>
-        <p><strong>Enviados:</strong> {{ reporte.enviado }}</p>
-        <p><strong>No Enviados:</strong> {{ reporte.no_enviado }}</p>
+        <p><strong>Correos Enviados:</strong> {{ reporte.enviado }}</p>
+        <p><strong>Correos No Enviados:</strong> {{ reporte.no_enviado }}</p>
+        <p><strong>SMS Enviados:</strong> {{ reporte.enviado_sms }}</p>
+        <p><strong>SMS No Enviados:</strong> {{ reporte.no_enviado_sms }}</p>
         <ion-button color="primary" (click)="mostrarDetalles(reporte)" >Ver Detalles</ion-button>
       </ion-card-content>
     </ion-card>
